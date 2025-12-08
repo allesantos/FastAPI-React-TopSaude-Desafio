@@ -35,17 +35,7 @@
 
 A **TopSaúde Hub** é um sistema completo de **catálogo de produtos e gerenciamento de pedidos** desenvolvido como desafio técnico. O projeto demonstra a aplicação de **Clean Architecture**, **SOLID**, **boas práticas de desenvolvimento** e **testes automatizados**.
 
-## 📸 Screenshots do Sistema 
-
 <img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/01.png" width="700">
-
-<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/02.png" width="700">
-
-<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/03.png" width="700">
-
-<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/04.png" width="700">
-
-<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/05.png" width="700">
 
 ### ✨ Destaques do Projeto
 
@@ -61,6 +51,8 @@ A **TopSaúde Hub** é um sistema completo de **catálogo de produtos e gerencia
 - 🐳 **Docker pronto para uso** com um único comando
 
 ---
+
+<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/02.png" width="700">
 
 ## 🚀 Funcionalidades
 
