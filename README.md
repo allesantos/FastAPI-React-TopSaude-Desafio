@@ -671,8 +671,8 @@ Este projeto foi desenvolvido como **desafio técnico** para **TopSaúde Hub**.
 
 Desenvolvido com 💚 por **Alexandre Santos**
 
-- GitHub: [@seu-usuario](https://github.com/allesantos)
-- LinkedIn: [Seu Perfil](https://www.linkedin.com/in/alle-carlos-alexandre/)
+- GitHub: [@allesantos](https://github.com/allesantos)
+- LinkedIn: [linkedin.com/in/alle-carlos-alexandre](https://www.linkedin.com/in/alle-carlos-alexandre/)
 - Email: alledesenvolvimento@gmail.com
 
 ---
