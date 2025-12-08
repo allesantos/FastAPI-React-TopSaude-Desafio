@@ -645,24 +645,24 @@ Contribuições são bem-vindas! Para contribuir:
 
 Este projeto foi desenvolvido como **desafio técnico** para **TopSaúde Hub**.
 
-**Desenvolvido por:** [Seu Nome]  
+**Desenvolvido por:** Alexandre Santos 
 **Prazo:** 3 dias corridos  
-**Data de Conclusão:** [Data]
+**Data de Conclusão:** 08/12/2025
 
 ---
 
 ## 👨‍💻 Autor
 
-Desenvolvido com 💚 por **[Seu Nome]**
+Desenvolvido com 💚 por **Alexandre Santos**
 
-- GitHub: [@seu-usuario](https://github.com/seu-usuario)
-- LinkedIn: [Seu Perfil](https://linkedin.com/in/seu-perfil)
-- Email: seu.email@exemplo.com
+- GitHub: [@seu-usuario](https://github.com/allesantos)
+- LinkedIn: [Seu Perfil](https://www.linkedin.com/in/alle-carlos-alexandre/)
+- Email: alledesenvolvimento@gmail.com
 
 ---
 
 <div align="center">
 
-**⭐ Se este projeto te ajudou, considere dar uma estrela! ⭐**
+**⭐ Se achou legal este projeto, considere dar uma estrela! ⭐**
 
 </div>
