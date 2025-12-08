@@ -13,7 +13,6 @@
 
 </div>
 
-<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/01.png" width="700">
 ---
 
 ## 📋 Índice
@@ -166,6 +165,8 @@ Antes de começar, você precisa ter instalado:
 
 ---
 ## 📸 Screenshots do Sistema
+
+<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/01.png" width="700">
 
 <img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/02.png" width="700">
 
