@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Ambiente virtual
+venv/
+env/
+ENV/
+
+# Testes e coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+
+# Git
+.git/
+.gitignore
+
+# Documentação
+*.md
+docs/
+
+# Logs
+*.log
+logs/
+
+# Database local
+*.db
+*.sqlite
+*.sqlite3
