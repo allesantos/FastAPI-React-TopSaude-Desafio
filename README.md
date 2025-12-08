@@ -22,6 +22,7 @@
 - [Tecnologias](#-tecnologias-utilizadas)
 - [Arquitetura](#-arquitetura)
 - [Pré-requisitos](#-pré-requisitos)
+- [Screenshots do Sistema](#-screenshots-do-sistema)
 - [Instalação e Execução](#-instalação-e-execução)
 - [Testes](#-testes)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
@@ -34,6 +35,8 @@
 ## 🎯 Sobre o Projeto
 
 A **TopSaúde Hub** é um sistema completo de **catálogo de produtos e gerenciamento de pedidos** desenvolvido como desafio técnico. O projeto demonstra a aplicação de **Clean Architecture**, **SOLID**, **boas práticas de desenvolvimento** e **testes automatizados**.
+
+
 
 ### ✨ Destaques do Projeto
 
@@ -159,6 +162,19 @@ Antes de começar, você precisa ter instalado:
 - 📦 **npm** ou **yarn**
 - 🐳 **Docker** e **Docker Compose** (recomendado)
 - 💾 **PostgreSQL** 15+ (se não usar Docker)
+
+---
+## 📸 Screenshots do Sistema
+
+<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/01.png" width="700">
+
+<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/02.png" width="700">
+
+<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/03.png" width="700">
+
+<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/04.png" width="700">
+
+<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/05.png" width="700">
 
 ---
 
@@ -645,24 +661,24 @@ Contribuições são bem-vindas! Para contribuir:
 
 Este projeto foi desenvolvido como **desafio técnico** para **TopSaúde Hub**.
 
-**Desenvolvido por:** [Seu Nome]  
+**Desenvolvido por:** Alexandre Santos 
 **Prazo:** 3 dias corridos  
-**Data de Conclusão:** [Data]
+**Data de Conclusão:** 08/12/2025
 
 ---
 
 ## 👨‍💻 Autor
 
-Desenvolvido com 💚 por **[Seu Nome]**
+Desenvolvido com 💚 por **Alexandre Santos**
 
-- GitHub: [@seu-usuario](https://github.com/seu-usuario)
-- LinkedIn: [Seu Perfil](https://linkedin.com/in/seu-perfil)
-- Email: seu.email@exemplo.com
+- GitHub: [@allesantos](https://github.com/allesantos)
+- LinkedIn: [linkedin.com/in/alle-carlos-alexandre](https://www.linkedin.com/in/alle-carlos-alexandre/)
+- Email: alledesenvolvimento@gmail.com
 
 ---
 
 <div align="center">
 
-**⭐ Se este projeto te ajudou, considere dar uma estrela! ⭐**
+**⭐ Se achou legal este projeto, considere dar uma estrela! ⭐**
 
 </div>
