@@ -13,6 +13,7 @@
 
 </div>
 
+<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/01.png" width="700">
 ---
 
 ## 📋 Índice
@@ -22,14 +23,13 @@
 - [Tecnologias](#-tecnologias-utilizadas)
 - [Arquitetura](#-arquitetura)
 - [Pré-requisitos](#-pré-requisitos)
+- [Screenshots do Sistema](#-screenshots-do-sistema)
 - [Instalação e Execução](#-instalação-e-execução)
 - [Testes](#-testes)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
 - [API Endpoints](#-api-endpoints)
 - [Decisões Técnicas](#-decisões-técnicas)
 - [Diferenciais Implementados](#-diferenciais-implementados)
-
-<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/01.png" width="700">
 
 ---
 
@@ -51,15 +51,6 @@ A **TopSaúde Hub** é um sistema completo de **catálogo de produtos e gerencia
 - 🎨 **Interface moderna** e responsiva com Tailwind CSS
 - ♿ **Acessibilidade** implementada (semântica HTML, navegação por teclado, ARIA)
 - 🐳 **Docker pronto para uso** com um único comando
-
-
-<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/02.png" width="700">
-
-<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/03.png" width="700">
-
-<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/04.png" width="700">
-
-<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/05.png" width="700">
 
 ---
 
@@ -172,6 +163,17 @@ Antes de começar, você precisa ter instalado:
 - 📦 **npm** ou **yarn**
 - 🐳 **Docker** e **Docker Compose** (recomendado)
 - 💾 **PostgreSQL** 15+ (se não usar Docker)
+
+---
+## 📸 Screenshots do Sistema
+
+<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/02.png" width="700">
+
+<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/03.png" width="700">
+
+<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/04.png" width="700">
+
+<img src="https://github.com/allesantos/allesantos/blob/main/imagens/TopSaude-Desafio/05.png" width="700">
 
 ---
 
