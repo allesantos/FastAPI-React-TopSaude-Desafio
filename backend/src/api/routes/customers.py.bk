@@ -71,36 +71,25 @@ def create_customer(
     "",
     response_model=ResponseEnvelope,
     summary="Listar clientes",
-    description="Lista clientes com paginação e filtros de busca (nome, email, documento)"
+    description="Lista clientes com paginação"
 )
 def list_customers(
     page: int = Query(1, ge=1, description="Número da página"),
     page_size: int = Query(20, ge=1, le=100, description="Tamanho da página"),
-    
-    # ✅ NOVOS FILTROS ADICIONADOS AQUI:
-    name: Optional[str] = Query(None, description="Filtrar por nome (busca parcial)"),
-    email: Optional[str] = Query(None, description="Filtrar por email (busca parcial)"),
-    document: Optional[str] = Query(None, description="Filtrar por documento (CPF/CNPJ)"),
-    
     db: Session = Depends(get_db)
 ):
     """
     Lista todos os clientes com suporte a:
     
     - **Paginação**: page e page_size
-    - **Filtros**: name, email, document (opcionais)
     """
     try:
         customer_repo = get_customer_repository(db)
         use_cases = CustomerUseCases(customer_repo)
         
-        # ⚠️ Passamos os novos filtros para o Use Case
         result = use_cases.list_customers(
             page=page,
-            page_size=page_size,
-            name=name,       
-            email=email,
-            document=document
+            page_size=page_size
         )
         
         return success_response(

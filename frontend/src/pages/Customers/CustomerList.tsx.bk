@@ -40,40 +40,53 @@ const CustomerList: React.FC = () => {
   const debouncedEmail = useDebounce(searchEmail, 500);
   const debouncedDocument = useDebounce(searchDocument, 500);
 
-// ==========================================
-  // BUSCAR CLIENTES (NOVA LÓGICA: ENVIA FILTROS AO BACKEND)
-  // ==========================================
+  // ==========================================
+  // BUSCAR CLIENTES
+  // ==========================================
 
-  // 1. Envolvemos a função em useCallback
-  const fetchCustomers = useCallback(async () => {
-    
-    // 2. Definimos params, incluindo os filtros de busca
-    const params: any = {
-      page,
-      page_size: pageSize,
-      
-      // ENVIAMOS OS VALORES DEBOUNCEADOS PARA O BACKEND
-      name: debouncedName || undefined,
-      email: debouncedEmail || undefined,
-      document: debouncedDocument || undefined,
-    };
+  const fetchCustomers = async () => {
+    const params: any = {
+      page,
+      page_size: pageSize,
+    };
 
-    // 3. Executamos a chamada à API com os novos parâmetros
-    const result = await execute(() => customerService.listCustomers(params));
-    
-    if (result) {
-      // 4. Apenas salvamos o resultado (o filtro local foi removido)
-      setCustomers(result);
-    }
-  }, [
-    execute, 
-    page, 
-    pageSize, 
-    debouncedName, 
-    debouncedEmail, 
-    debouncedDocument
-  ]);
+    // Nota: Backend ainda não suporta filtros de nome/email/documento
+    // na listagem. Por enquanto, apenas paginação funciona.
+    // TODO: Implementar filtros no backend se necessário
+
+    const result = await execute(() => customerService.listCustomers(params));
     
+    if (result) {
+      // Filtro local enquanto backend não suporta
+      let filtered = result.items;
+
+      if (debouncedName) {
+        filtered = filtered.filter((c) =>
+          c.name.toLowerCase().includes(debouncedName.toLowerCase())
+        );
+      }
+
+      if (debouncedEmail) {
+        filtered = filtered.filter((c) =>
+          c.email.toLowerCase().includes(debouncedEmail.toLowerCase())
+        );
+      }
+
+      if (debouncedDocument) {
+        const cleanDoc = debouncedDocument.replace(/\D/g, '');
+        filtered = filtered.filter((c) =>
+          c.document.replace(/\D/g, '').includes(cleanDoc)
+        );
+      }
+
+      setCustomers({
+        ...result,
+        items: filtered,
+        total: filtered.length,
+      });
+    }
+  };
+
   // ==========================================
   // 📡 EFFECTS
   // ==========================================

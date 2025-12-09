@@ -111,34 +111,25 @@ class CustomerUseCases:
     def list_customers(
         self,
         page: int = 1,
-        page_size: int = 20,
-        # ✅ NOVOS PARÂMETROS ADICIONADOS AQUI:
-        name: Optional[str] = None,
-        email: Optional[str] = None,
-        document: Optional[str] = None
+        page_size: int = 20
     ) -> CustomerListResponse:
         """
-        Lista clientes com paginação e filtros.
+        Lista clientes com paginação.
         
         Args:
             page: Número da página (começando em 1)
             page_size: Tamanho da página
-            name, email, document: Filtros de busca opcionais
         
         Returns:
-            CustomerListResponse com lista paginada e filtrada
+            CustomerListResponse com lista paginada
         """
         # Calcular skip
         skip = (page - 1) * page_size
         
         # Buscar clientes
-        # ⚠️ CHAMADA AO REPOSITÓRIO CORRIGIDA: Incluindo os filtros
         customers, total = self.customer_repository.list_all(
             skip=skip,
-            limit=page_size,
-            name=name,
-            email=email,
-            document=document
+            limit=page_size
         )
         
         # Calcular total de páginas
@@ -154,7 +145,6 @@ class CustomerUseCases:
             page_size=page_size,
             total_pages=total_pages
         )
-
     
     def update_customer(self, customer_id: int, customer_data: CustomerUpdate) -> CustomerResponse:
         """
@@ -211,20 +201,3 @@ class CustomerUseCases:
             raise CustomerNotFoundException(f"Cliente com ID {customer_id} não encontrado")
         
         return success
-    '''
-    def update(self, customer: CustomerEntity) -> CustomerEntity:
-        db_customer = self.db.query(Customer).filter(Customer.id == customer.id).first()
-
-        if not db_customer:
-            raise CustomerNotFoundException(f"Cliente ID {customer.id} não encontrado")
-
-        # Atualiza os campos
-        db_customer.name = customer.name
-        db_customer.email = customer.email
-        db_customer.document = CustomerEntity.format_document(customer.document)
-
-        self.db.commit()
-        self.db.refresh(db_customer)
-
-        return self._to_entity(db_customer)
-    '''

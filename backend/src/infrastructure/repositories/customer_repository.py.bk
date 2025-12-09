@@ -59,75 +59,32 @@ class CustomerRepository(ICustomerRepository):
             return None
         return self._to_entity(db_customer)
     
-    def list_all(
-        self, 
-        skip: int = 0, 
-        limit: int = 20,
-        # ✅ NOVOS PARÂMETROS DE FILTRO ADICIONADOS:
-        name: Optional[str] = None,
-        email: Optional[str] = None,
-        document: Optional[str] = None
-    ) -> tuple[List[CustomerEntity], int]:
-        
+    def list_all(self, skip: int = 0, limit: int = 20) -> tuple[List[CustomerEntity], int]:
         query = self.db.query(Customer)
-        
-        # ⚠️ APLICAÇÃO DO FILTROS USANDO iLIKE (busca case-insensitive)
-        if name:
-            query = query.filter(Customer.name.ilike(f"%{name}%"))
-        
-        if email:
-            query = query.filter(Customer.email.ilike(f"%{email}%"))
-        
-        if document:
-            cleaned_document = CustomerEntity.format_document(document)
-            query = query.filter(Customer.document.ilike(f"%{cleaned_document}%"))
-        
         total = query.count()
         db_customers = query.offset(skip).limit(limit).all()
-        
         customers = [self._to_entity(c) for c in db_customers]
         return customers, total
-
-
-    # -------------------------------------------------------------
-    # ✅ MÉTODO FALTANTE — IMPLEMENTAÇÃO DO update()
-    # -------------------------------------------------------------
+    
     def update(self, customer: CustomerEntity) -> CustomerEntity:
         db_customer = self.db.query(Customer).filter(Customer.id == customer.id).first()
         if not db_customer:
-            raise CustomerNotFoundException(f"Cliente ID {customer.id} não encontrado")
-
-        # Verificar duplicidade de email se mudou
+            raise CustomerNotFoundException(f"Cliente com ID {customer.id} não encontrado")
+        
         if customer.email != db_customer.email:
-            exists_email = (
-                self.db.query(Customer)
-                .filter(Customer.email == customer.email, Customer.id != customer.id)
-                .first()
-            )
-            if exists_email:
+            if self.db.query(Customer).filter(Customer.email == customer.email, Customer.id != customer.id).first():
                 raise DuplicateEmailException(f"Email '{customer.email}' já existe")
-
-        # Verificar duplicidade de documento se mudou
-        new_document = CustomerEntity.format_document(customer.document)
-        if new_document != db_customer.document:
-            exists_document = (
-                self.db.query(Customer)
-                .filter(Customer.document == new_document, Customer.id != customer.id)
-                .first()
-            )
-            if exists_document:
+        if CustomerEntity.format_document(customer.document) != db_customer.document:
+            if self.db.query(Customer).filter(Customer.document == CustomerEntity.format_document(customer.document), Customer.id != customer.id).first():
                 raise DuplicateDocumentException(f"Documento '{customer.document}' já existe")
-
-        # Atualizar campos
+        
         db_customer.name = customer.name
         db_customer.email = customer.email
-        db_customer.document = new_document
-
+        db_customer.document = CustomerEntity.format_document(customer.document)
         self.db.commit()
         self.db.refresh(db_customer)
         return self._to_entity(db_customer)
-
-
+    
     def delete(self, customer_id: int) -> bool:
         db_customer = self.db.query(Customer).filter(Customer.id == customer_id).first()
         if not db_customer:
