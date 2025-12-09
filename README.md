@@ -546,41 +546,69 @@ Todas as respostas seguem o formato:
 
 ## 🤖 Uso de IA no Desenvolvimento
 
-Este projeto foi desenvolvido com auxílio de **Inteligência Artificial (Claude by Anthropic)** de forma estratégica e consciente:
+Conforme orientação do desafio, utilizei **IA (Claude by Anthropic)** de forma estratégica durante o desenvolvimento. Abaixo, descrevo como essa ferramenta foi aplicada:
 
-### 📚 **Como a IA foi Utilizada:**
+### 📊 **Onde a IA Foi Utilizada:**
 
-1. **Arquitetura e Estrutura** 🏗️
-   - Definição da estrutura de pastas seguindo Clean Architecture
-   - Revisão de padrões SOLID e boas práticas
-   - Sugestões de organização de código
+#### **1. Arquitetura e Planejamento** 🏗️
+- Validação da estrutura Clean Architecture proposta
+- Revisão de padrões SOLID aplicados
+- Discussão de trade-offs entre abordagens (ORM vs Query Builder, etc)
 
-2. **Geração de Código Base** 💻
-   - Scaffolding inicial de entities, DTOs e repositories
-   - Templates de testes unitários
-   - Configurações de bibliotecas (Alembic, Structlog, etc)
+#### **2. Geração de Código Base** 💻
+- Scaffolding inicial de entities, DTOs e repositories
+- Templates padronizados de testes unitários
+- Configurações iniciais de ferramentas (Alembic, Structlog, Docker)
 
-3. **Revisão e Otimização** 🔍
-   - Code review automático
-   - Identificação de problemas de performance
-   - Sugestões de refatoração
+#### **3. Otimização e Code Review** 🔍
+- Identificação de code smells e sugestões de refatoração
+- Revisão de implementações críticas (transações, idempotência)
+- Sugestões de melhoria de performance
 
-4. **Documentação** 📝
-   - Geração de comentários explicativos
-   - Criação deste README
-   - Documentação de decisões técnicas
+#### **4. Documentação** 📝
+- Geração de comentários explicativos no código
+- Estrutura deste README
+- Documentação de decisões técnicas
 
-### ✅ **O que NÃO foi feito pela IA:**
+### ✋ **Onde EU Fui Responsável:**
 
-- ❌ Decisões de arquitetura (foram minhas)
-- ❌ Escolha de tecnologias (baseada em experiência)
-- ❌ Lógica de negócio crítica (idempotência, transações)
-- ❌ Testes críticos (foram pensados e validados manualmente)
-- ❌ Validações e regras de negócio
+- ✅ **Decisões de Arquitetura**: Escolha de Clean Architecture, separação de camadas
+- ✅ **Escolha de Stack**: Python 3.12 + FastAPI + PostgreSQL + React + Tailwind
+- ✅ **Lógica de Negócio Crítica**: Implementação de idempotência, transações atômicas, controle de estoque
+- ✅ **Estratégia de Testes**: Definição dos 54 testes unitários (93% cobertura) e testes críticos
+- ✅ **Validações e Regras**: Todas as regras de negócio foram pensadas e validadas manualmente
+- ✅ **Integração e Debugging**: Resolução de problemas, ajustes finos e testes E2E
 
-### 💡 **Resultado:**
+### 🎯 **Metodologia de Trabalho:**
 
-A IA foi uma **ferramenta de produtividade**, não um substituto para conhecimento técnico. Cada linha de código foi revisada, testada e compreendida antes de ser integrada ao projeto.
+1. **Planejamento**: Defini a arquitetura e tecnologias baseado em experiência prévia
+2. **Geração Assistida**: Usei IA para acelerar scaffolding e boilerplate
+3. **Revisão Crítica**: Revisei, testei e compreendi cada linha gerada
+4. **Validação**: Executei testes automatizados e manuais para garantir qualidade
+5. **Refinamento**: Ajustei e otimizei baseado em resultados reais
+
+### 💡 **Reflexão sobre o Uso de IA:**
+
+A IA foi uma **ferramenta de produtividade**, não um substituto para conhecimento técnico. Ela acelerou tarefas repetitivas e permitiu focar em:
+- Decisões de alto nível
+- Lógica de negócio complexa
+- Garantia de qualidade
+- Experiência do usuário
+
+**Resultado**: Entrega de projeto completo com 93% de cobertura de testes, arquitetura sólida e código de produção.
+
+### 🔧 **Ferramentas Complementares:**
+
+Além da IA, utilizei:
+- **VS Code** com extensões de Python e TypeScript
+- **Docker Desktop** para containerização
+- **Postman** para testes manuais de API
+- **Git** para controle de versão
+- **Chrome DevTools** para debug do frontend
+
+---
+
+**Nota**: Todos os commits e decisões técnicas são de minha autoria. A IA foi uma assistente, não a autora do projeto.
 
 ---
 
@@ -662,7 +690,6 @@ Contribuições são bem-vindas! Para contribuir:
 Este projeto foi desenvolvido como **desafio técnico** para **TopSaúde Hub**.
 
 **Desenvolvido por:** Alexandre Santos 
-**Prazo:** 3 dias corridos  
 **Data de Conclusão:** 08/12/2025
 
 ---
