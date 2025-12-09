@@ -77,12 +77,10 @@ def list_customers(
     page: int = Query(1, ge=1, description="Número da página"),
     page_size: int = Query(20, ge=1, le=100, description="Tamanho da página"),
     
-    # ✅ NOVOS FILTROS ADICIONADOS AQUI:
     name: Optional[str] = Query(None, description="Filtrar por nome (busca parcial)"),
     email: Optional[str] = Query(None, description="Filtrar por email (busca parcial)"),
-    document: Optional[str] = Query(None, description="Filtrar por documento (CPF/CNPJ)"),
-    
-    db: Session = Depends(get_db)
+    document: Optional[str] = Query(None, description="Filtrar por documento (CPF/CNPJ)"), 
+    db: Session = Depends(get_db)   
 ):
     """
     Lista todos os clientes com suporte a:

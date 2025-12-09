@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Search, Users, Eye, Edit, Trash2, Mail, FileText } from 'lucide-react';
 import { Table, ColumnDef } from '../../components/common/Table';
 import { useDebounce } from '../../hooks/useDebounce';
@@ -41,28 +41,28 @@ const CustomerList: React.FC = () => {
   const debouncedDocument = useDebounce(searchDocument, 500);
 
 // ==========================================
-  // BUSCAR CLIENTES (NOVA LÓGICA: ENVIA FILTROS AO BACKEND)
+  // BUSCAR CLIENTES (ENVIA FILTROS AO BACKEND)
   // ==========================================
 
-  // 1. Envolvemos a função em useCallback
+  // Envolver a função em useCallback
   const fetchCustomers = useCallback(async () => {
     
-    // 2. Definimos params, incluindo os filtros de busca
+    // Definir params, incluindo os filtros de busca
     const params: any = {
       page,
       page_size: pageSize,
       
-      // ENVIAMOS OS VALORES DEBOUNCEADOS PARA O BACKEND
+      // ENVIAR OS VALORES DEBOUNCEADOS PARA O BACKEND
       name: debouncedName || undefined,
       email: debouncedEmail || undefined,
-      document: debouncedDocument || undefined,
+      document: debouncedDocument?.replace(/\D/g, '') || undefined,
     };
 
-    // 3. Executamos a chamada à API com os novos parâmetros
+    // Executar a chamada à API com os novos parâmetros
     const result = await execute(() => customerService.listCustomers(params));
     
     if (result) {
-      // 4. Apenas salvamos o resultado (o filtro local foi removido)
+      // Apenas salvar o resultado 
       setCustomers(result);
     }
   }, [
@@ -280,18 +280,6 @@ const CustomerList: React.FC = () => {
               </div>
             </div>
           </div>
-
-          {/* Botão Limpar */}
-          {(searchName || searchEmail || searchDocument) && (
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={clearFilters}
-                className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium"
-              >
-                Limpar Filtros
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Mensagem de Erro */}

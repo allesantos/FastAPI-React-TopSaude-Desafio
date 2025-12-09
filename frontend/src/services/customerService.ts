@@ -62,9 +62,12 @@ export const createCustomer = async (data: CustomerCreate): Promise<Customer> =>
  */
 export const listCustomers = async (params?: CustomerListParams): Promise<CustomerListResponse> => {
   try {
-    // O objeto 'params' agora pode conter name, email ou document.
-    // O Axios (via api.get) irá adicioná-los como query parameters na URL.
-    const response = await api.get('/api/customers', { params });
+    const finalParams = {
+      ...params,
+      document: params?.document ? params.document.replace(/\D/g, '') : undefined
+    };
+
+    const response = await api.get('/api/customers', { params: finalParams });
     
     // Retorna os dados do envelope
     return response.data.data;
