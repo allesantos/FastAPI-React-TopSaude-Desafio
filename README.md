@@ -4,12 +4,24 @@
 
 <div align="center">
 
-[![Python](https://img.shields.io/badge/Python-3.12.10-blue?logo=python)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115.12-green?logo=fastapi)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/React-19.2.1-blue?logo=react)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17.2-blue?logo=postgresql)](https://www.postgresql.org/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)](https://www.docker.com/)
+<a href="https://www.python.org/" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Python-3.12.10-blue?logo=python" alt="Python">
+</a>
+<a href="https://fastapi.tiangolo.com/" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/FastAPI-0.115.12-green?logo=fastapi" alt="FastAPI">
+</a>
+<a href="https://react.dev/" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/React-19.2.1-blue?logo=react" alt="React">
+</a>
+<a href="https://www.typescriptlang.org/" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript" alt="TypeScript">
+</a>
+<a href="https://www.postgresql.org/" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/PostgreSQL-17.2-blue?logo=postgresql" alt="PostgreSQL">
+</a>
+<a href="https://www.docker.com/" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Docker-Ready-blue?logo=docker" alt="Docker">
+</a>
 
 </div>
 
@@ -419,7 +431,7 @@ Todas as respostas seguem o formato:
 }
 ```
 
-**Documentação interativa completa:** http://localhost:8000/docs
+**Documentação interativa completa:** localhost:8000/docs
 
 ---
 
