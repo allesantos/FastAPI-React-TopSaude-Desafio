@@ -45,7 +45,7 @@ A **TopSaúde Hub** é um sistema completo de **catálogo de produtos e gerencia
 - ⚡ **Transações atômicas** com rollback automático (requisito obrigatório)
 - 📦 **Controle de estoque** com validação antes de confirmar pedido (requisito obrigatório)
 - 📊 **Logs estruturados** com Structlog (requisito obrigatório)
-- 🧪 **93% de cobertura de testes** automatizados (requisito: mínimo 70%)
+- 🧪 **91.5% de cobertura de testes** automatizados (requisito: mínimo 70%)
 - 📋 **Envelope de resposta padrão** em todas as APIs (requisito obrigatório)
 - 🎨 **Interface moderna** e responsiva com Tailwind CSS
 - ♿ **Acessibilidade** implementada (semântica HTML, navegação por teclado, ARIA)
@@ -186,7 +186,7 @@ A forma mais rápida de rodar o projeto completo!
 
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/seu-usuario/topsaude-hub.git
+git clone https://github.com/allesantos/topsaude-desafio.git
 cd topsaude-hub
 
 # 2. Configure as variáveis de ambiente
@@ -264,7 +264,7 @@ npm run dev
 
 ## 🧪 Testes
 
-O projeto possui **93% de cobertura de testes** automatizados!
+O projeto possui **91.5% de cobertura de testes** automatizados!
 
 ### 🔬 **Executar Testes Unitários**
 
@@ -285,21 +285,21 @@ pytest tests/ -v --cov=src --cov-report=html
 ### 📊 **Cobertura Atual**
 
 ```
-✅ 54 testes unitários automatizados
+✅ 56 testes unitários automatizados
    - 35 testes de Entities
    - 12 testes de Use Cases (incluindo 3 críticos!)
    - 7 testes de Repository
 
-📈 93% de cobertura (requisito: 70%)
+📈 91.5% de cobertura (requisito: 70%)
 ✅ 100% dos testes passando
 ⚡ Tempo de execução: ~2.5 segundos
 ```
 
 ### 🔥 **Testes Críticos Implementados**
 
-- ✅ **Idempotência**: mesma chave retorna mesmo pedido
-- ✅ **Idempotência**: payloads diferentes com mesma chave = erro
-- ✅ **Transação Atômica**: erro reverte TUDO automaticamente
+- ✅ **Idempotência (mesma chave)**: retorna o pedido existente sem duplicar
+- ✅ **Idempotência (payload diferente)**: rejeita se payload divergir
+- ✅ **Transação Atômica/Rollback**: erro reverte TUDO automaticamente
 - ✅ **Controle de Estoque**: validação antes de confirmar pedido
 - ✅ **Rollback Automático**: falhas não deixam dados inconsistentes
 
@@ -443,12 +443,12 @@ Todas as respostas seguem o formato:
 ### 🎨 **5. Clean Architecture**
 - **Problema**: Código acoplado e difícil de testar
 - **Solução**: Separação em camadas (Domain → Application → Infrastructure → API)
-- **Resultado**: Alta testabilidade (93% cobertura) e manutenibilidade
+- **Resultado**: Alta testabilidade (91.5% cobertura) e manutenibilidade
 
 ### 🧪 **6. Testes Unitários com Mocks**
 - **Problema**: Testes lentos dependendo do banco
 - **Solução**: Mocks de repositories + factories de entities
-- **Resultado**: 54 testes rodando em ~2.5 segundos
+- **Resultado**: 56 testes rodando em ~2.5 segundos
 
 ---
 
@@ -456,7 +456,7 @@ Todas as respostas seguem o formato:
 
 ### 🏆 **Além dos Requisitos**
 
-1. ✅ **Cobertura de 93%** (requisito era 70%)
+1. ✅ **Cobertura de 91.5%** (requisito era 70%)
 2. ✅ **Testes críticos** de idempotência e transação
 3. ✅ **Soft delete** em produtos e clientes
 4. ✅ **Filtros e ordenação** customizáveis
@@ -488,7 +488,7 @@ Todas as respostas seguem o formato:
 | **Idempotência via Header** | ✅ | `Idempotency-Key` obrigatório + testes críticos |
 | **Envelope de Resposta Padrão** | ✅ | `src/api/response_envelope.py` |
 | **Logs Estruturados** | ✅ | Structlog configurado + middleware |
-| **Testes Unitários** | ✅ | 54 testes, 93% de cobertura |
+| **Testes Unitários** | ✅ | 56 testes, 91.5% de cobertura |
 | **SOLID + Clean Architecture** | ✅ | Separação Domain/Application/Infrastructure/API |
 | **PostgreSQL** | ✅ | Configurado no Docker Compose |
 | **Migrations** | ✅ | Alembic configurado |
