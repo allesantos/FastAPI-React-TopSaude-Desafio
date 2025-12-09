@@ -187,7 +187,7 @@ A forma mais rápida de rodar o projeto completo!
 ```bash
 # 1. Clone o repositório
 git clone https://github.com/allesantos/topsaude-desafio.git
-cd topsaude-hub
+cd topsaude-desafio
 
 # 2. Configure as variáveis de ambiente
 cp .env.example .env
@@ -308,7 +308,7 @@ pytest tests/ -v --cov=src --cov-report=html
 ## 📁 Estrutura do Projeto
 
 ```
-topsaude-hub/
+topsaude-desafio/
 ├── backend/
 │   ├── src/
 │   │   ├── domain/              # 🎯 Entities e regras de negócio
@@ -329,7 +329,8 @@ topsaude-hub/
 │   │   ├── api/                 # 🌐 Rotas e Controllers
 │   │   │   ├── routes/
 │   │   │   ├── dependencies.py
-│   │   │   └── middleware.py
+│   │   │   ├── middleware.py
+│   │   │   └── response_envelope.py  # ← Envelope padrão de resposta
 │   │   ├── core/                # ⚙️ Configurações
 │   │   │   ├── config.py
 │   │   │   └── constants.py
@@ -337,11 +338,16 @@ topsaude-hub/
 │   ├── tests/                   # 🧪 Testes automatizados
 │   │   ├── domain/
 │   │   ├── application/
-│   │   └── infrastructure/
-│   ├── alembic/                 # 📝 Migrations
+│   │   ├── infrastructure/
+│   │   ├── conftest.py          # ← Configurações do pytest
+│   │   └── pytest.ini           # ← Configurações do pytest
 │   ├── scripts/                 # 🛠️ Scripts úteis
+│   │   ├── seed_data.py         # ← Popular banco com dados de teste
+│   │   └── healthcheck.py       # ← Script de healthcheck
+│   ├── alembic/                 # 📝 Migrations
 │   ├── requirements.txt
-│   └── Dockerfile
+│   ├── Dockerfile
+│   └── .gitignore               # ← Arquivos ignorados pelo Git
 ├── frontend/
 │   ├── src/
 │   │   ├── components/          # 🧩 Componentes React
@@ -366,7 +372,6 @@ topsaude-hub/
 ├── .env.example
 └── README.md
 ```
-
 ---
 
 ## 🔌 API Endpoints
@@ -575,7 +580,7 @@ Conforme orientação do desafio, utilizei **IA (Claude by Anthropic)** de forma
 - ✅ **Decisões de Arquitetura**: Escolha de Clean Architecture, separação de camadas
 - ✅ **Escolha de Stack**: Python 3.12 + FastAPI + PostgreSQL + React + Tailwind
 - ✅ **Lógica de Negócio Crítica**: Implementação de idempotência, transações atômicas, controle de estoque
-- ✅ **Estratégia de Testes**: Definição dos 54 testes unitários (93% cobertura) e testes críticos
+- ✅ **Estratégia de Testes**: Definição dos 56 testes unitários (91.5% cobertura)
 - ✅ **Validações e Regras**: Todas as regras de negócio foram pensadas e validadas manualmente
 - ✅ **Integração e Debugging**: Resolução de problemas, ajustes finos e testes E2E
 
