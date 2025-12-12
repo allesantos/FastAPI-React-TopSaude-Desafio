@@ -1,0 +1,24 @@
+# ==========================================
+# 🔥 DOCKERFILE - DESENVOLVIMENTO (HOT RELOAD)
+# ==========================================
+
+FROM node:24-alpine
+
+# Definir diretório de trabalho
+WORKDIR /app
+
+# Copiar arquivos de dependências
+COPY package*.json ./
+
+# Instalar dependências
+RUN npm install
+
+# Copiar o resto do código
+# (Será sobrescrito pelo volume no docker-compose)
+COPY . .
+
+# Expor porta do Vite
+EXPOSE 5173
+
+# Comando para rodar em modo desenvolvimento
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

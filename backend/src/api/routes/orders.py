@@ -14,7 +14,9 @@ from src.domain.exceptions.business_exceptions import (
     OrderNotFoundException,
     ProductNotFoundException,
     CustomerNotFoundException,
-    InsufficientStockException
+    InsufficientStockException,
+    OrderCannotBeCancelledException,
+    OrderCannotBePaidException
 )
 from src.infrastructure.logging.logger import get_logger
 
@@ -27,45 +29,14 @@ router = APIRouter(prefix="/orders", tags=["Pedidos"])
     "",
     response_model=dict,
     status_code=status.HTTP_201_CREATED,
-    summary="Criar novo pedido",
-    description="""
-    Cria um novo pedido com validações completas.
-    
-    **IMPORTANTE:** Header `Idempotency-Key` é obrigatório para evitar duplicação.
-    
-    **Validações:**
-    - Cliente deve existir e estar ativo
-    - Produtos devem existir e estar ativos
-    - Estoque deve ser suficiente para todos itens
-    - Cálculo automático de totais
-    - Atualização automática de estoque
-    - Transação atômica (tudo ou nada)
-    
-    **Idempotência:**
-    Se mesma `Idempotency-Key` for enviada novamente, retorna o pedido existente
-    ao invés de criar um duplicado.
-    """
+    summary="Criar novo pedido"
 )
 def create_order(
     order_data: OrderCreate,
     idempotency_key: str = Header(..., alias="Idempotency-Key"),
     use_cases: OrderUseCases = Depends(get_order_use_cases)
 ):
-    """
-    Cria um novo pedido.
-    
-    Args:
-        order_data: Dados do pedido (customer_id + items)
-        idempotency_key: Chave única para idempotência (header obrigatório)
-        use_cases: Use cases de pedidos (injetado)
-    
-    Returns:
-        Envelope com OrderResponse
-    
-    Raises:
-        400: Dados inválidos, cliente/produto não encontrado, estoque insuficiente
-        500: Erro interno do servidor
-    """
+    """Cria um novo pedido."""
     try:
         logger.info(
             "Requisição para criar pedido",
@@ -76,7 +47,6 @@ def create_order(
             }
         )
         
-        # Criar pedido (com todas validações)
         order = use_cases.create_order(order_data, idempotency_key)
         
         logger.info(
@@ -94,27 +64,19 @@ def create_order(
     
     except CustomerNotFoundException as e:
         logger.warning("Cliente não encontrado", extra={"error": str(e)})
-        return error_response(
-            message=str(e)
-        )
+        return error_response(message=str(e))
     
     except ProductNotFoundException as e:
         logger.warning("Produto não encontrado", extra={"error": str(e)})
-        return error_response(
-            message=str(e)
-        )
+        return error_response(message=str(e))
     
     except InsufficientStockException as e:
         logger.warning("Estoque insuficiente", extra={"error": str(e)})
-        return error_response(
-            message=str(e)
-        )
+        return error_response(message=str(e))
     
     except ValueError as e:
         logger.warning("Erro de validação", extra={"error": str(e)})
-        return error_response(
-            message=str(e)
-        )
+        return error_response(message=str(e))
     
     except Exception as e:
         logger.error(
@@ -125,22 +87,11 @@ def create_order(
         return error_response(message="Erro interno no servidor")
 
 
-
 @router.get(
     "",
     response_model=dict,
     status_code=status.HTTP_200_OK,
-    summary="Listar pedidos",
-    description="""
-    Lista pedidos com paginação e filtros opcionais.
-    
-    **Paginação:**
-    - `page`: Número da página (padrão: 1)
-    - `page_size`: Itens por página (padrão: 20, máx: 100)
-    
-    **Filtros:**
-    - `customer_id`: Filtrar pedidos de um cliente específico
-    """
+    summary="Listar pedidos"
 )
 def list_orders(
     page: int = Query(1, ge=1, description="Número da página"),
@@ -148,18 +99,7 @@ def list_orders(
     customer_id: Optional[int] = Query(None, description="Filtrar por cliente"),
     use_cases: OrderUseCases = Depends(get_order_use_cases)
 ):
-    """
-    Lista pedidos com paginação.
-    
-    Args:
-        page: Número da página (mín: 1)
-        page_size: Itens por página (mín: 1, máx: 100)
-        customer_id: ID do cliente para filtrar (opcional)
-        use_cases: Use cases de pedidos (injetado)
-    
-    Returns:
-        Envelope com OrderListResponse (lista + metadados)
-    """
+    """Lista pedidos com paginação."""
     try:
         logger.info(
             "Requisição para listar pedidos",
@@ -170,7 +110,6 @@ def list_orders(
             }
         )
         
-        # Listar pedidos
         result = use_cases.list_orders(
             page=page,
             page_size=page_size,
@@ -197,47 +136,23 @@ def list_orders(
             extra={"error": str(e)},
             exc_info=True
         )
-        return error_response(
-            message="Erro ao listar pedidos"
-        )
+        return error_response(message="Erro ao listar pedidos")
 
 
 @router.get(
     "/{order_id}",
     response_model=dict,
     status_code=status.HTTP_200_OK,
-    summary="Buscar pedido por ID",
-    description="""
-    Busca um pedido específico por ID.
-    
-    Retorna todos os dados do pedido incluindo:
-    - Informações do pedido (customer_id, total, status)
-    - Lista completa de itens (produtos, quantidades, preços)
-    - Datas de criação e atualização
-    """
+    summary="Buscar pedido por ID"
 )
 def get_order(
     order_id: int,
     use_cases: OrderUseCases = Depends(get_order_use_cases)
 ):
-    """
-    Busca um pedido por ID.
-    
-    Args:
-        order_id: ID do pedido
-        use_cases: Use cases de pedidos (injetado)
-    
-    Returns:
-        Envelope com OrderResponse
-    
-    Raises:
-        404: Pedido não encontrado
-        500: Erro interno do servidor
-    """
+    """Busca um pedido por ID."""
     try:
         logger.info("Requisição para buscar pedido", extra={"order_id": order_id})
         
-        # Buscar pedido
         order = use_cases.get_order_by_id(order_id)
         
         logger.info(
@@ -255,9 +170,7 @@ def get_order(
     
     except OrderNotFoundException as e:
         logger.warning("Pedido não encontrado", extra={"error": str(e)})
-        return error_response(
-            message=str(e)
-        )
+        return error_response(message=str(e))
     
     except Exception as e:
         logger.error(
@@ -265,6 +178,84 @@ def get_order(
             extra={"error": str(e)},
             exc_info=True
         )
-        return error_response(
-            message="Erro ao buscar pedido"
+        return error_response(message="Erro ao buscar pedido")
+
+
+@router.patch(
+    "/{order_id}/cancel",
+    response_model=dict,
+    status_code=status.HTTP_200_OK,
+    summary="Cancelar pedido"
+)
+def cancel_order(
+    order_id: int,
+    use_cases: OrderUseCases = Depends(get_order_use_cases)
+):
+    """Cancela um pedido."""
+    try:
+        logger.info("Requisição para cancelar pedido", extra={"order_id": order_id})
+        
+        order = use_cases.cancel_order(order_id)
+        
+        logger.info("Pedido cancelado com sucesso", extra={"order_id": order_id})
+        
+        return success_response(
+            data=order.model_dump(),
+            message="Pedido cancelado com sucesso"
         )
+    
+    except OrderNotFoundException as e:
+        logger.warning("Pedido não encontrado", extra={"error": str(e)})
+        return error_response(message=str(e))
+    
+    except OrderCannotBeCancelledException as e:
+        logger.warning("Pedido não pode ser cancelado", extra={"error": str(e)})
+        return error_response(message=str(e))
+    
+    except Exception as e:
+        logger.error(
+            "Erro ao cancelar pedido",
+            extra={"error": str(e)},
+            exc_info=True
+        )
+        return error_response(message="Erro ao cancelar pedido")
+
+
+@router.patch(
+    "/{order_id}/pay",
+    response_model=dict,
+    status_code=status.HTTP_200_OK,
+    summary="Marcar pedido como pago"
+)
+def mark_order_as_paid(
+    order_id: int,
+    use_cases: OrderUseCases = Depends(get_order_use_cases)
+):
+    """Marca um pedido como pago."""
+    try:
+        logger.info("Requisição para marcar pedido como pago", extra={"order_id": order_id})
+        
+        order = use_cases.mark_as_paid(order_id)
+        
+        logger.info("Pedido marcado como pago", extra={"order_id": order_id})
+        
+        return success_response(
+            data=order.model_dump(),
+            message="Pedido marcado como pago com sucesso"
+        )
+    
+    except OrderNotFoundException as e:
+        logger.warning("Pedido não encontrado", extra={"error": str(e)})
+        return error_response(message=str(e))
+    
+    except OrderCannotBePaidException as e:
+        logger.warning("Pedido não pode ser marcado como pago", extra={"error": str(e)})
+        return error_response(message=str(e))
+    
+    except Exception as e:
+        logger.error(
+            "Erro ao marcar pedido como pago",
+            extra={"error": str(e)},
+            exc_info=True
+        )
+        return error_response(message="Erro ao marcar pedido como pago")

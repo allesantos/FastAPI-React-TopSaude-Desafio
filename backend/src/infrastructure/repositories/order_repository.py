@@ -6,7 +6,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from src.application.interfaces.repositories import IOrderRepository
 from src.domain.entities.order import OrderEntity
-from src.domain.entities.order_item import OrderItemEntity  # ✅ ADICIONADO!
+from src.domain.entities.order_item import OrderItemEntity
 from src.infrastructure.database.models import Order, OrderItem
 from src.domain.exceptions.business_exceptions import OrderNotFoundException
 
@@ -23,7 +23,6 @@ class OrderRepository(IOrderRepository):
         Se qualquer parte falhar, faz rollback completo.
         """
         try:
-            # Criar pedido
             db_order = Order(
                 customer_id=order.customer_id,
                 total_amount=order.total_amount,
@@ -31,12 +30,11 @@ class OrderRepository(IOrderRepository):
                 idempotency_key=order.idempotency_key
             )
             self.db.add(db_order)
-            self.db.flush()  # ✅ Flush para obter ID, mas SEM commit ainda
+            self.db.flush()
             
-            # Criar os itens do pedido
             for item in order.items:
                 db_item = OrderItem(
-                    order_id=db_order.id,  # ✅ Agora temos o ID do pedido
+                    order_id=db_order.id,
                     product_id=item.product_id,
                     unit_price=item.unit_price,
                     quantity=item.quantity,
@@ -44,14 +42,12 @@ class OrderRepository(IOrderRepository):
                 )
                 self.db.add(db_item)
             
-            # ✅ ÚNICO commit ao final (transação atômica)
             self.db.commit()
             self.db.refresh(db_order)
             
             return self._to_entity(db_order)
         
         except Exception as e:
-            # ✅ Rollback se qualquer coisa falhar
             self.db.rollback()
             raise e
     
@@ -74,7 +70,7 @@ class OrderRepository(IOrderRepository):
         skip: int = 0, 
         limit: int = 20, 
         customer_id: Optional[int] = None
-    ) -> tuple[List[OrderEntity], int]:  # ✅ CORRIGIDO: Agora retorna tupla
+    ) -> tuple[List[OrderEntity], int]:
         """
         Lista pedidos com paginação.
         Retorna tupla (lista_de_pedidos, total_de_registros).
@@ -84,39 +80,33 @@ class OrderRepository(IOrderRepository):
         if customer_id:
             query = query.filter(Order.customer_id == customer_id)
         
-        # ✅ Contar total ANTES de aplicar skip/limit
         total = query.count()
-        
-        # Buscar registros paginados
         db_orders = query.offset(skip).limit(limit).all()
         
-        # ✅ Retornar tupla (lista, total)
         return [self._to_entity(o) for o in db_orders], total
     
     def update(self, order: OrderEntity) -> OrderEntity:
         """Atualiza um pedido existente."""
         db_order = self.db.query(Order).filter(Order.id == order.id).first()
-        if not db_order:
-            raise OrderNotFoundException(f"Pedido com ID {order.id} não encontrado")
         
-        db_order.customer_id = order.customer_id
-        db_order.total_amount = order.total_amount
+        if not db_order:
+            raise OrderNotFoundException(f"Pedido {order.id} não encontrado")
+        
         db_order.status = order.status
+        db_order.updated_at = order.updated_at
+        
         self.db.commit()
         self.db.refresh(db_order)
+        
         return self._to_entity(db_order)
     
     def _to_entity(self, db_order: Order) -> OrderEntity:
-        """
-        Converte modelo ORM para entidade de domínio.
-        ✅ CORRIGIDO: Agora cria OrderItemEntity corretamente!
-        """
+        """Converte modelo ORM para entidade de domínio."""
         items = []
         
-        # ✅ Criar OrderItemEntity para cada item (NÃO OrderEntity!)
         for db_item in db_order.items:
             items.append(
-                OrderItemEntity(  # ✅ CORRETO! Era OrderEntity antes (ERRO!)
+                OrderItemEntity(
                     id=db_item.id,
                     order_id=db_item.order_id,
                     product_id=db_item.product_id,
@@ -126,7 +116,6 @@ class OrderRepository(IOrderRepository):
                 )
             )
         
-        # Criar e retornar OrderEntity com os itens
         return OrderEntity(
             id=db_order.id,
             customer_id=db_order.customer_id,
@@ -135,5 +124,5 @@ class OrderRepository(IOrderRepository):
             idempotency_key=db_order.idempotency_key,
             created_at=db_order.created_at,
             updated_at=db_order.updated_at,
-            items=items  # ✅ Lista de OrderItemEntity
+            items=items
         )

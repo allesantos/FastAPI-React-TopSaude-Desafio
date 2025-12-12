@@ -55,10 +55,12 @@ class InvalidOrderStatusException(BusinessException):
     """Status de pedido inválido."""
     pass
 
-class InsufficientStockException(Exception):
-    """Exceção lançada quando não há estoque suficiente."""
+
+class OrderCannotBeCancelledException(BusinessException):
+    """Pedido não pode ser cancelado."""
     pass
 
-class DuplicateIdempotencyKeyException(Exception):
-    """Exceção lançada quando uma chave de idempotência duplicada é encontrada."""
+
+class OrderCannotBePaidException(BusinessException):
+    """Pedido não pode ser marcado como pago."""
     pass

@@ -106,12 +106,7 @@ const CustomerList: React.FC = () => {
   // 🧹 LIMPAR FILTROS
   // ==========================================
 
-  const clearFilters = () => {
-    setSearchName('');
-    setSearchEmail('');
-    setSearchDocument('');
-    goToPage(1);
-  };
+  
 
   // ==========================================
   // DEFINIÇÃO DAS COLUNAS

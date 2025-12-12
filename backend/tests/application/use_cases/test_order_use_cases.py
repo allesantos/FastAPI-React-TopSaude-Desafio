@@ -539,3 +539,183 @@ class TestOrderUseCases:
             limit=10,
             customer_id=None
         )
+
+"""
+Testes unitários para OrderUseCases - Status Management.
+"""
+
+import pytest
+from unittest.mock import MagicMock
+from src.application.use_cases.order_use_cases import OrderUseCases
+from src.core.constants import OrderStatus
+from src.domain.exceptions.business_exceptions import (
+    OrderNotFoundException,
+    OrderCannotBeCancelledException,
+    OrderCannotBePaidException
+)
+
+
+class TestCancelOrder:
+    """Testes para cancelamento de pedidos."""
+    
+    def test_cancel_order_success(
+        self,
+        order_factory,
+        mock_order_repository,
+        mock_product_repository,
+        mock_customer_repository,
+        mock_db_session
+    ):
+        """Deve cancelar pedido com sucesso."""
+        order = order_factory(status=OrderStatus.CREATED.value)
+        mock_order_repository.get_by_id.return_value = order
+        mock_order_repository.update.return_value = order
+        
+        use_cases = OrderUseCases(
+            order_repository=mock_order_repository,
+            product_repository=mock_product_repository,
+            customer_repository=mock_customer_repository,
+            db=mock_db_session
+        )
+        
+        result = use_cases.cancel_order(order.id)
+        
+        assert result.status == OrderStatus.CANCELLED.value
+        mock_order_repository.get_by_id.assert_called_once_with(order.id)
+        mock_order_repository.update.assert_called_once()
+    
+    def test_cancel_order_not_found(
+        self,
+        mock_order_repository,
+        mock_product_repository,
+        mock_customer_repository,
+        mock_db_session
+    ):
+        """Deve lançar exceção quando pedido não existe."""
+        mock_order_repository.get_by_id.return_value = None
+        
+        use_cases = OrderUseCases(
+            order_repository=mock_order_repository,
+            product_repository=mock_product_repository,
+            customer_repository=mock_customer_repository,
+            db=mock_db_session
+        )
+        
+        with pytest.raises(OrderNotFoundException):
+            use_cases.cancel_order(999)
+    
+    def test_cancel_order_when_paid_raises_exception(
+        self,
+        order_factory,
+        mock_order_repository,
+        mock_product_repository,
+        mock_customer_repository,
+        mock_db_session
+    ):
+        """Deve lançar exceção ao tentar cancelar pedido pago."""
+        order = order_factory(status=OrderStatus.PAID.value)
+        mock_order_repository.get_by_id.return_value = order
+        
+        use_cases = OrderUseCases(
+            order_repository=mock_order_repository,
+            product_repository=mock_product_repository,
+            customer_repository=mock_customer_repository,
+            db=mock_db_session
+        )
+        
+        with pytest.raises(OrderCannotBeCancelledException):
+            use_cases.cancel_order(order.id)
+
+
+class TestMarkAsPaid:
+    """Testes para marcar pedido como pago."""
+    
+    def test_mark_as_paid_success(
+        self,
+        order_factory,
+        mock_order_repository,
+        mock_product_repository,
+        mock_customer_repository,
+        mock_db_session
+    ):
+        """Deve marcar pedido como pago com sucesso."""
+        order = order_factory(status=OrderStatus.CREATED.value)
+        mock_order_repository.get_by_id.return_value = order
+        mock_order_repository.update.return_value = order
+        
+        use_cases = OrderUseCases(
+            order_repository=mock_order_repository,
+            product_repository=mock_product_repository,
+            customer_repository=mock_customer_repository,
+            db=mock_db_session
+        )
+        
+        result = use_cases.mark_as_paid(order.id)
+        
+        assert result.status == OrderStatus.PAID.value
+        mock_order_repository.get_by_id.assert_called_once_with(order.id)
+        mock_order_repository.update.assert_called_once()
+    
+    def test_mark_as_paid_not_found(
+        self,
+        mock_order_repository,
+        mock_product_repository,
+        mock_customer_repository,
+        mock_db_session
+    ):
+        """Deve lançar exceção quando pedido não existe."""
+        mock_order_repository.get_by_id.return_value = None
+        
+        use_cases = OrderUseCases(
+            order_repository=mock_order_repository,
+            product_repository=mock_product_repository,
+            customer_repository=mock_customer_repository,
+            db=mock_db_session
+        )
+        
+        with pytest.raises(OrderNotFoundException):
+            use_cases.mark_as_paid(999)
+    
+    def test_mark_as_paid_when_cancelled_raises_exception(
+        self,
+        order_factory,
+        mock_order_repository,
+        mock_product_repository,
+        mock_customer_repository,
+        mock_db_session
+    ):
+        """Deve lançar exceção ao tentar marcar como pago pedido cancelado."""
+        order = order_factory(status=OrderStatus.CANCELLED.value)
+        mock_order_repository.get_by_id.return_value = order
+        
+        use_cases = OrderUseCases(
+            order_repository=mock_order_repository,
+            product_repository=mock_product_repository,
+            customer_repository=mock_customer_repository,
+            db=mock_db_session
+        )
+        
+        with pytest.raises(OrderCannotBePaidException):
+            use_cases.mark_as_paid(order.id)
+    
+    def test_mark_as_paid_when_already_paid_raises_exception(
+        self,
+        order_factory,
+        mock_order_repository,
+        mock_product_repository,
+        mock_customer_repository,
+        mock_db_session
+    ):
+        """Deve lançar exceção ao tentar marcar como pago pedido já pago."""
+        order = order_factory(status=OrderStatus.PAID.value)
+        mock_order_repository.get_by_id.return_value = order
+        
+        use_cases = OrderUseCases(
+            order_repository=mock_order_repository,
+            product_repository=mock_product_repository,
+            customer_repository=mock_customer_repository,
+            db=mock_db_session
+        )
+        
+        with pytest.raises(OrderCannotBePaidException):
+            use_cases.mark_as_paid(order.id)

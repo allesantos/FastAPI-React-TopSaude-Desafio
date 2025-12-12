@@ -1,27 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, ShoppingCart, Eye, Filter, XCircle } from 'lucide-react';
+import { Plus, ShoppingCart, Eye, Filter, XCircle, Ban, CheckCircle } from 'lucide-react';
 import { Table, ColumnDef } from '../../components/common/Table';
+import { OrderStatusBadge } from '../../components/common/OrderStatusBadge';
 import { usePagination } from '../../hooks/usePagination';
 import { useApi } from '../../hooks/useApi';
+import { useOrderActions } from '../../hooks/useOrderActions';
 import orderService from '../../services/orderService';
 import customerService from '../../services/customerService';
 import { formatPrice, formatDate } from '../../services/api';
 import type { Order, OrderListResponse, Customer } from '../../types';
-import { PAGINATION, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from '../../constants';
+import { PAGINATION } from '../../constants';
 
 const OrderList: React.FC = () => {
   const navigate = useNavigate();
   
-  // Estados
   const [orders, setOrders] = useState<OrderListResponse | null>(null);
   const [customersCache, setCustomersCache] = useState<Record<number, Customer>>({});
   const [filterCustomerId, setFilterCustomerId] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const { page, pageSize, goToPage } = usePagination(PAGINATION.DEFAULT_PAGE, PAGINATION.DEFAULT_PAGE_SIZE);
   const { loading, error, execute } = useApi<OrderListResponse>();
+  const { cancelOrder, markAsPaid, loading: actionLoading } = useOrderActions();
 
-  // Buscar pedidos
   const fetchOrders = async () => {
     const params: any = {
       page,
@@ -51,7 +52,6 @@ const OrderList: React.FC = () => {
     }
   };
 
-  // Buscar clientes
   const fetchCustomersForOrders = async (orderList: Order[]) => {
     const customerIds = [...new Set(orderList.map((o) => o.customer_id))];
     const newCache = { ...customersCache };
@@ -84,7 +84,24 @@ const OrderList: React.FC = () => {
     navigate(`/orders/${order.id}`);
   };
 
-  // Estatísticas
+  const handleCancel = async (order: Order) => {
+    if (window.confirm(`Deseja realmente cancelar o pedido #${order.id}?`)) {
+      const success = await cancelOrder(order.id);
+      if (success) {
+        fetchOrders();
+      }
+    }
+  };
+
+  const handleMarkAsPaid = async (order: Order) => {
+    if (window.confirm(`Confirmar pagamento do pedido #${order.id}?`)) {
+      const success = await markAsPaid(order.id);
+      if (success) {
+        fetchOrders();
+      }
+    }
+  };
+
   const getOrderStats = () => {
     if (!orders) return null;
 
@@ -99,7 +116,6 @@ const OrderList: React.FC = () => {
 
   const stats = getOrderStats();
 
-  // Colunas
   const columns: ColumnDef<Order>[] = [
     {
       key: 'id',
@@ -147,13 +163,7 @@ const OrderList: React.FC = () => {
     {
       key: 'status',
       header: 'Status',
-      render: (value) => (
-        <span
-          className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${ORDER_STATUS_COLORS[value]}`}
-        >
-          {ORDER_STATUS_LABELS[value] || value}
-        </span>
-      ),
+      render: (value) => <OrderStatusBadge status={value} />,
     },
     {
       key: 'created_at',
@@ -165,22 +175,52 @@ const OrderList: React.FC = () => {
     },
   ];
 
-  // Ações
   const renderActions = (order: Order) => (
-    <button
-      onClick={() => handleViewDetails(order)}
-      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-      aria-label={`Ver detalhes do pedido ${order.id}`}
-    >
-      <Eye className="w-4 h-4" aria-hidden="true" />
-    </button>
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => handleViewDetails(order)}
+        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+        aria-label={`Ver detalhes do pedido ${order.id}`}
+      >
+        <Eye className="w-4 h-4" aria-hidden="true" />
+      </button>
+      
+      {order.status === 'CREATED' && (
+        <>
+          <button
+            onClick={() => handleMarkAsPaid(order)}
+            disabled={actionLoading}
+            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-green-500"
+            aria-label={`Marcar pedido ${order.id} como pago`}
+          >
+            <CheckCircle className="w-4 h-4" aria-hidden="true" />
+          </button>
+          
+          <button
+            onClick={() => handleCancel(order)}
+            disabled={actionLoading}
+            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500"
+            aria-label={`Cancelar pedido ${order.id}`}
+          >
+            <Ban className="w-4 h-4" aria-hidden="true" />
+          </button>
+        </>
+      )}
+      
+      {order.status === 'PAID' && (
+        <span className="text-xs text-green-600 font-medium">✓ Pago</span>
+      )}
+      
+      {order.status === 'CANCELLED' && (
+        <span className="text-xs text-red-600 font-medium">✗ Cancelado</span>
+      )}
+    </div>
   );
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         
-        {/* Header */}
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center space-x-2">
@@ -202,7 +242,6 @@ const OrderList: React.FC = () => {
           </button>
         </header>
 
-        {/* Estatísticas */}
         {stats && !loading && (
           <section aria-label="Estatísticas de pedidos" className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="bg-white rounded-lg shadow p-4">
@@ -215,7 +254,7 @@ const OrderList: React.FC = () => {
             </div>
             <div className="bg-white rounded-lg shadow p-4">
               <p className="text-sm text-gray-600">Criados</p>
-              <p className="text-2xl font-bold text-blue-600">{stats.byStatus['CREATED'] || 0}</p>
+              <p className="text-2xl font-bold text-yellow-600">{stats.byStatus['CREATED'] || 0}</p>
             </div>
             <div className="bg-white rounded-lg shadow p-4">
               <p className="text-sm text-gray-600">Pagos</p>
@@ -224,7 +263,6 @@ const OrderList: React.FC = () => {
           </section>
         )}
 
-        {/* Filtros */}
         <section aria-label="Filtros de busca" className="bg-white rounded-lg shadow p-4 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
@@ -274,33 +312,21 @@ const OrderList: React.FC = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
               >
                 <option value="all">Todos os status</option>
-                <option value="CREATED">📝 Criado</option>
-                <option value="PAID">✅ Pago</option>
-                <option value="CANCELLED">❌ Cancelado</option>
+                <option value="CREATED">🟡 Criado</option>
+                <option value="PAID">🟢 Pago</option>
+                <option value="CANCELLED">🔴 Cancelado</option>
               </select>
             </div>
           </div>
         </section>
 
-        {/* Erro */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg" role="alert">
-            <p className="font-medium">❌ Erro ao carregar pedidos</p>
+            <p className="font-medium">Erro ao carregar pedidos</p>
             <p className="text-sm">{error}</p>
           </div>
         )}
 
-        {/* Aviso */}
-        {filterStatus !== 'all' && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3" role="status">
-            <p className="text-yellow-800 text-sm">
-              ℹ️ <strong>Nota:</strong> Filtro de status está sendo aplicado localmente. 
-              Para melhor performance, considere implementar no backend.
-            </p>
-          </div>
-        )}
-
-        {/* Tabela */}
         <Table
           data={orders?.items || []}
           columns={columns}

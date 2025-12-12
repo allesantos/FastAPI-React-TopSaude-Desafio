@@ -20,7 +20,9 @@ from src.domain.exceptions.business_exceptions import (
     ProductNotFoundException,
     CustomerNotFoundException,
     InsufficientStockException,
-    DuplicateIdempotencyKeyException
+    DuplicateIdempotencyKeyException,
+    OrderCannotBeCancelledException,
+    OrderCannotBePaidException
 )
 from src.infrastructure.logging.logger import get_logger
 from src.core.constants import OrderStatus
@@ -48,31 +50,7 @@ class OrderUseCases:
         order_data: OrderCreate, 
         idempotency_key: str
     ) -> OrderResponse:
-        """
-        Cria um novo pedido com validações completas e idempotência.
-        
-        FUNCIONALIDADES CRÍTICAS:
-        - Idempotência: Se mesma key já existe, retorna pedido existente
-        - Validação de cliente (existe e ativo)
-        - Validação de produtos (existem e ativos)
-        - Validação de estoque (disponível para todos itens)
-        - Cálculo de totais (line_total e total_amount)
-        - Atualização de estoque (desconta quantidades)
-        - Transação atômica (tudo ou nada)
-        
-        Args:
-            order_data: Dados do pedido (customer_id + items)
-            idempotency_key: Chave única para evitar duplicação
-        
-        Returns:
-            OrderResponse com pedido criado
-        
-        Raises:
-            CustomerNotFoundException: Cliente não encontrado
-            ProductNotFoundException: Produto não encontrado
-            InsufficientStockException: Estoque insuficiente
-            ValueError: Produto inativo
-        """
+        """Cria um novo pedido com validações completas e idempotência."""
         logger.info(
             "Iniciando criação de pedido",
             extra={
@@ -82,9 +60,6 @@ class OrderUseCases:
             }
         )
         
-        # ========================================
-        # 1. IDEMPOTÊNCIA - Verificar se já existe
-        # ========================================
         existing_order = self.order_repository.get_by_idempotency_key(idempotency_key)
         if existing_order:
             logger.warning(
@@ -94,13 +69,9 @@ class OrderUseCases:
                     "existing_order_id": existing_order.id
                 }
             )
-            # Retornar pedido existente (não criar duplicado)
             return self._entity_to_response(existing_order)
         
         try:
-            # ========================================
-            # 2. VALIDAR CLIENTE
-            # ========================================
             customer = self.customer_repository.get_by_id(order_data.customer_id)
             if not customer:
                 logger.error(
@@ -120,14 +91,10 @@ class OrderUseCases:
                     f"Cliente com ID {order_data.customer_id} está inativo"
                 )
             
-            # ========================================
-            # 3. VALIDAR PRODUTOS E ESTOQUE
-            # ========================================
             items_entities = []
             total_amount = Decimal("0.00")
             
             for item_data in order_data.items:
-                # Buscar produto
                 product = self.product_repository.get_by_id(item_data.product_id)
                 
                 if not product:
@@ -139,7 +106,6 @@ class OrderUseCases:
                         f"Produto com ID {item_data.product_id} não encontrado"
                     )
                 
-                # Validar se produto está ativo
                 if not product.is_active:
                     logger.error(
                         "Produto inativo",
@@ -149,7 +115,6 @@ class OrderUseCases:
                         f"Produto '{product.name}' (ID {item_data.product_id}) está inativo"
                     )
                 
-                # Validar estoque disponível
                 if product.stock_qty < item_data.quantity:
                     logger.error(
                         "Estoque insuficiente",
@@ -165,27 +130,22 @@ class OrderUseCases:
                         f"Disponível: {product.stock_qty}, Solicitado: {item_data.quantity}"
                     )
                 
-                # Calcular totais
                 unit_price = Decimal(str(product.price))
                 quantity = item_data.quantity
                 line_total = unit_price * Decimal(quantity)
                 total_amount += line_total
                 
-                # Criar entidade do item
                 item_entity = OrderItemEntity(
                     id=None,
-                    order_id=None,  # Será preenchido após criar pedido
+                    order_id=None,
                     product_id=item_data.product_id,
                     unit_price=unit_price,
                     quantity=quantity,
                     line_total=line_total
                 )
-                item_entity.validate()  # Validar regras de negócio
+                item_entity.validate()
                 items_entities.append(item_entity)
             
-            # ========================================
-            # 4. CRIAR ENTIDADE DO PEDIDO
-            # ========================================
             order_entity = OrderEntity(
                 id=None,
                 customer_id=order_data.customer_id,
@@ -194,26 +154,15 @@ class OrderUseCases:
                 idempotency_key=idempotency_key,
                 items=items_entities
             )
-            order_entity.validate()  # Validar regras de negócio
+            order_entity.validate()
             
-            # ========================================
-            # 5. PERSISTIR PEDIDO (Transação Atômica)
-            # ========================================
-            # IMPORTANTE: order_repository.create() já faz transação atômica
-            # devido às correções da Parte 9B
             created_order = self.order_repository.create(order_entity)
             
-            # ========================================
-            # 6. ATUALIZAR ESTOQUE DOS PRODUTOS
-            # ========================================
-            # NOTA: Isso deve estar na MESMA transação do create()
-            # Para garantir atomicidade, vamos fazer flush() mas sem commit()
             for item_data in order_data.items:
                 product = self.product_repository.get_by_id(item_data.product_id)
                 product.stock_qty -= item_data.quantity
                 self.product_repository.update(product)
             
-            # Commit final (se o repository não fez ainda)
             self.db.commit()
             
             logger.info(
@@ -234,12 +183,10 @@ class OrderUseCases:
             InsufficientStockException,
             ValueError
         ):
-            # Rollback mantendo a exceção original
             self.db.rollback()
             raise
 
         except Exception as e:
-            # Rollback para erro inesperado
             self.db.rollback()
             logger.error(
                 "Erro inesperado ao criar pedido",
@@ -252,19 +199,38 @@ class OrderUseCases:
             )
             raise
     
+    def cancel_order(self, order_id: int) -> OrderResponse:
+        """Cancela um pedido."""
+        logger.info("Cancelando pedido", extra={"order_id": order_id})
+        
+        order = self.order_repository.get_by_id(order_id)
+        if not order:
+            raise OrderNotFoundException(f"Pedido {order_id} não encontrado")
+        
+        order.cancel()
+        
+        updated_order = self.order_repository.update(order)
+        
+        logger.info("Pedido cancelado", extra={"order_id": order_id})
+        return self._entity_to_response(updated_order)
+    
+    def mark_as_paid(self, order_id: int) -> OrderResponse:
+        """Marca pedido como pago."""
+        logger.info("Marcando pedido como pago", extra={"order_id": order_id})
+        
+        order = self.order_repository.get_by_id(order_id)
+        if not order:
+            raise OrderNotFoundException(f"Pedido {order_id} não encontrado")
+        
+        order.mark_as_paid()
+        
+        updated_order = self.order_repository.update(order)
+        
+        logger.info("Pedido marcado como pago", extra={"order_id": order_id})
+        return self._entity_to_response(updated_order)
+    
     def get_order_by_id(self, order_id: int) -> OrderResponse:
-        """
-        Busca um pedido por ID.
-        
-        Args:
-            order_id: ID do pedido
-        
-        Returns:
-            OrderResponse com dados completos do pedido
-        
-        Raises:
-            OrderNotFoundException: Pedido não encontrado
-        """
+        """Busca um pedido por ID."""
         logger.info("Buscando pedido por ID", extra={"order_id": order_id})
         
         order = self.order_repository.get_by_id(order_id)
@@ -281,17 +247,7 @@ class OrderUseCases:
         page_size: int = 20,
         customer_id: Optional[int] = None
     ) -> OrderListResponse:
-        """
-        Lista pedidos com paginação e filtros.
-        
-        Args:
-            page: Número da página (começa em 1)
-            page_size: Quantidade de itens por página
-            customer_id: Filtrar por cliente (opcional)
-        
-        Returns:
-            OrderListResponse com lista paginada de pedidos
-        """
+        """Lista pedidos com paginação e filtros."""
         logger.info(
             "Listando pedidos",
             extra={
@@ -301,20 +257,16 @@ class OrderUseCases:
             }
         )
         
-        # Calcular skip
         skip = (page - 1) * page_size
         
-        # Buscar pedidos (retorna tupla: lista + total)
         orders, total = self.order_repository.list_all(
             skip=skip,
             limit=page_size,
             customer_id=customer_id
         )
         
-        # Converter para DTOs
         items = [self._entity_to_response(order) for order in orders]
         
-        # Calcular total de páginas
         total_pages = (total + page_size - 1) // page_size
         
         return OrderListResponse(
@@ -326,16 +278,7 @@ class OrderUseCases:
         )
     
     def _entity_to_response(self, order: OrderEntity) -> OrderResponse:
-        """
-        Converte OrderEntity para OrderResponse (DTO).
-        
-        Args:
-            order: Entidade do pedido
-        
-        Returns:
-            OrderResponse (DTO)
-        """
-        # Converter itens
+        """Converte OrderEntity para OrderResponse (DTO)."""
         items_response = [
             OrderItemResponse(
                 id=item.id,
@@ -348,7 +291,6 @@ class OrderUseCases:
             for item in order.items
         ]
         
-        # Converter pedido
         return OrderResponse(
             id=order.id,
             customer_id=order.customer_id,

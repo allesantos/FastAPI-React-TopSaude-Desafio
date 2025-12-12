@@ -2,10 +2,14 @@
 Entidade Order do domínio.
 Representa a lógica de negócio de um pedido.
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Optional, List, TYPE_CHECKING
 from src.core.constants import OrderStatus
+from src.domain.exceptions.business_exceptions import (
+    OrderCannotBeCancelledException,
+    OrderCannotBePaidException
+)
 
 if TYPE_CHECKING:
     from src.domain.entities.order_item import OrderItemEntity
@@ -62,16 +66,26 @@ class OrderEntity:
     
     def can_be_cancelled(self) -> bool:
         """Verifica se o pedido pode ser cancelado."""
-        return self.status in [OrderStatus.CREATED.value]
+        return self.status == OrderStatus.CREATED.value
+    
+    def can_be_paid(self) -> bool:
+        """Verifica se o pedido pode ser marcado como pago."""
+        return self.status == OrderStatus.CREATED.value
     
     def cancel(self) -> None:
         """Cancela o pedido."""
         if not self.can_be_cancelled():
-            raise ValueError(f"Pedido com status {self.status} não pode ser cancelado")
+            raise OrderCannotBeCancelledException(
+                f"Pedido com status {self.status} não pode ser cancelado"
+            )
         self.status = OrderStatus.CANCELLED.value
+        self.updated_at = datetime.now(timezone.utc)
     
     def mark_as_paid(self) -> None:
         """Marca o pedido como pago."""
-        if self.status != OrderStatus.CREATED.value:
-            raise ValueError(f"Apenas pedidos criados podem ser marcados como pagos")
+        if not self.can_be_paid():
+            raise OrderCannotBePaidException(
+                f"Pedido com status {self.status} não pode ser marcado como pago"
+            )
         self.status = OrderStatus.PAID.value
+        self.updated_at = datetime.now(timezone.utc)

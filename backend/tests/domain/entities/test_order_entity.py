@@ -123,3 +123,110 @@ class TestOrderEntity:
         
         # Assert
         assert order.status == OrderStatus.PAID.value
+
+"""
+Testes unitários para OrderEntity - Status Management.
+"""
+
+import pytest
+from decimal import Decimal
+from src.domain.entities.order import OrderEntity
+from src.core.constants import OrderStatus
+from src.domain.exceptions.business_exceptions import (
+    OrderCannotBeCancelledException,
+    OrderCannotBePaidException
+)
+
+
+class TestOrderStatusManagement:
+    """Testes de gerenciamento de status de pedidos."""
+    
+    def test_can_be_cancelled_when_created(self, order_factory):
+        """Deve permitir cancelamento quando status é CREATED."""
+        order = order_factory(status=OrderStatus.CREATED.value)
+        
+        assert order.can_be_cancelled() is True
+    
+    def test_cannot_be_cancelled_when_paid(self, order_factory):
+        """Não deve permitir cancelamento quando status é PAID."""
+        order = order_factory(status=OrderStatus.PAID.value)
+        
+        assert order.can_be_cancelled() is False
+    
+    def test_cannot_be_cancelled_when_already_cancelled(self, order_factory):
+        """Não deve permitir cancelamento quando já está cancelado."""
+        order = order_factory(status=OrderStatus.CANCELLED.value)
+        
+        assert order.can_be_cancelled() is False
+    
+    def test_cancel_order_success(self, order_factory):
+        """Deve cancelar pedido com status CREATED."""
+        order = order_factory(status=OrderStatus.CREATED.value)
+        
+        order.cancel()
+        
+        assert order.status == OrderStatus.CANCELLED.value
+        assert order.updated_at is not None
+    
+    def test_cancel_order_when_paid_raises_exception(self, order_factory):
+        """Deve lançar exceção ao tentar cancelar pedido pago."""
+        order = order_factory(status=OrderStatus.PAID.value)
+        
+        with pytest.raises(OrderCannotBeCancelledException) as exc_info:
+            order.cancel()
+        
+        assert "não pode ser cancelado" in str(exc_info.value)
+    
+    def test_cancel_order_when_already_cancelled_raises_exception(self, order_factory):
+        """Deve lançar exceção ao tentar cancelar pedido já cancelado."""
+        order = order_factory(status=OrderStatus.CANCELLED.value)
+        
+        with pytest.raises(OrderCannotBeCancelledException) as exc_info:
+            order.cancel()
+        
+        assert "não pode ser cancelado" in str(exc_info.value)
+    
+    def test_can_be_paid_when_created(self, order_factory):
+        """Deve permitir marcar como pago quando status é CREATED."""
+        order = order_factory(status=OrderStatus.CREATED.value)
+        
+        assert order.can_be_paid() is True
+    
+    def test_cannot_be_paid_when_already_paid(self, order_factory):
+        """Não deve permitir marcar como pago quando já está pago."""
+        order = order_factory(status=OrderStatus.PAID.value)
+        
+        assert order.can_be_paid() is False
+    
+    def test_cannot_be_paid_when_cancelled(self, order_factory):
+        """Não deve permitir marcar como pago quando está cancelado."""
+        order = order_factory(status=OrderStatus.CANCELLED.value)
+        
+        assert order.can_be_paid() is False
+    
+    def test_mark_as_paid_success(self, order_factory):
+        """Deve marcar pedido como pago quando status é CREATED."""
+        order = order_factory(status=OrderStatus.CREATED.value)
+        
+        order.mark_as_paid()
+        
+        assert order.status == OrderStatus.PAID.value
+        assert order.updated_at is not None
+    
+    def test_mark_as_paid_when_already_paid_raises_exception(self, order_factory):
+        """Deve lançar exceção ao tentar marcar como pago pedido já pago."""
+        order = order_factory(status=OrderStatus.PAID.value)
+        
+        with pytest.raises(OrderCannotBePaidException) as exc_info:
+            order.mark_as_paid()
+        
+        assert "não pode ser marcado como pago" in str(exc_info.value)
+    
+    def test_mark_as_paid_when_cancelled_raises_exception(self, order_factory):
+        """Deve lançar exceção ao tentar marcar como pago pedido cancelado."""
+        order = order_factory(status=OrderStatus.CANCELLED.value)
+        
+        with pytest.raises(OrderCannotBePaidException) as exc_info:
+            order.mark_as_paid()
+        
+        assert "não pode ser marcado como pago" in str(exc_info.value)
