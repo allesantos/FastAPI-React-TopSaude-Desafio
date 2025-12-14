@@ -117,18 +117,18 @@ def criar_clientes(session) -> None:
         session: Sessão do SQLAlchemy
     """
     clientes = [
-        {"name": "Maria Silva Santos", "email": "maria.santos@email.com", "document": "12345678901"},
-        {"name": "Joao Pedro Oliveira", "email": "joao.oliveira@email.com", "document": "23456789012"},
-        {"name": "Ana Carolina Costa", "email": "ana.costa@email.com", "document": "34567890123"},
-        {"name": "Carlos Eduardo Souza", "email": "carlos.souza@email.com", "document": "45678901234"},
-        {"name": "Fernanda Lima Alves", "email": "fernanda.alves@email.com", "document": "56789012345"},
-        {"name": "Ricardo Mendes Rocha", "email": "ricardo.rocha@email.com", "document": "67890123456"},
-        {"name": "Patricia Fernandes", "email": "patricia.fernandes@email.com", "document": "78901234567"},
-        {"name": "Roberto Carlos Dias", "email": "roberto.dias@email.com", "document": "89012345678"},
-        {"name": "Juliana Martins Pereira", "email": "juliana.pereira@email.com", "document": "90123456789"},
-        {"name": "Paulo Henrique Gomes", "email": "paulo.gomes@email.com", "document": "01234567890"},
+    {"name": "Maria Silva Santos", "email": "maria.santos@email.com", "document": "67687120558"},
+    {"name": "Joao Pedro Oliveira", "email": "joao.oliveira@email.com", "document": "99721131326"},
+    {"name": "Ana Carolina Costa", "email": "ana.costa@email.com", "document": "92428551205"},
+    {"name": "Carlos Eduardo Souza", "email": "carlos.souza@email.com", "document": "32674037237"},
+    {"name": "Fernanda Lima Alves", "email": "fernanda.alves@email.com", "document": "40249267306"},
+    {"name": "Ricardo Mendes Rocha", "email": "ricardo.rocha@email.com", "document": "58789777379"},
+    {"name": "Patricia Fernandes", "email": "patricia.fernandes@email.com", "document": "24023047589"},
+    {"name": "Roberto Carlos Dias", "email": "roberto.dias@email.com", "document": "54203214831"},
+    {"name": "Juliana Martins Pereira", "email": "juliana.pereira@email.com", "document": "28177056107"},
+    {"name": "Paulo Henrique Gomes", "email": "paulo.gomes@email.com", "document": "23796100104"},
     ]
-    
+
     clientes_criados = 0
     clientes_existentes = 0
     

@@ -81,6 +81,9 @@ class CustomerRepository(ICustomerRepository):
         if document:
             cleaned_document = CustomerEntity.format_document(document)
             query = query.filter(Customer.document.ilike(f"%{cleaned_document}%"))
+            print(f"🔍 DEBUG - Document recebido: '{document}'")
+            print(f"🔍 DEBUG - Document limpo: '{cleaned_document}'")
+            print(f"🔍 DEBUG - Total antes de filtrar: {self.db.query(Customer).count()}")
         
         total = query.count()
         db_customers = query.offset(skip).limit(limit).all()

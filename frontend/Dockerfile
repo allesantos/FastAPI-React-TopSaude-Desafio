@@ -6,7 +6,15 @@ FROM node:24-alpine AS build
 # Define diretório de trabalho
 WORKDIR /app
 
-ARG VITE_API_URL
+# Build arguments (recebidos do docker-compose.yml)
+ARG VITE_API_BASE_URL
+ARG VITE_APP_NAME
+ARG VITE_APP_VERSION
+
+# Converter ARGs em ENVs para o Vite poder ler durante o build
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+ENV VITE_APP_NAME=${VITE_APP_NAME}
+ENV VITE_APP_VERSION=${VITE_APP_VERSION}
 
 # Copiar arquivos de dependências
 COPY package*.json ./
@@ -17,7 +25,7 @@ RUN npm ci --silent
 # Copiar código fonte
 COPY . .
 
-# Build da aplicação
+# Build da aplicação (Vite vai usar as ENVs acima)
 RUN npm run build
 
 # ==========================================

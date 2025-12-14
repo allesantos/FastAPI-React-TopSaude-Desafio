@@ -90,4 +90,4 @@ alembic/versions/__pycache__/
 *.suo
 *.ntvs*
 *.njsproj
-*.sln
+*.slndocker-stack.yml

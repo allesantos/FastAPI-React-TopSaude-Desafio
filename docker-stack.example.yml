@@ -1,0 +1,154 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # BANCO DE DADOS POSTGRESQL
+  # ==========================================
+  db:
+    image: postgres:17.2-alpine
+    environment:
+      POSTGRES_USER: topsaude_user
+      POSTGRES_PASSWORD: sua_senha_aqui
+      POSTGRES_DB: topsaude_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - topsaude_network
+      - aiautomate
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U topsaude_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    ports:
+      - target: 5432
+        published: 5433
+        protocol: tcp
+        mode: host
+
+  # ==========================================
+  # BACKEND API (FastAPI) - PRODUÇÃO
+  # ==========================================
+  backend:
+    image: topsaude-backend:latest
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/dbname
+      APP_NAME: "TopSaude Hub API"
+      APP_VERSION: "1.0.0"
+      DEBUG: "False"
+      ENVIRONMENT: production
+      LOG_LEVEL: INFO
+      HOST: 0.0.0.0
+      PORT: "8000"
+      CORS_ORIGINS: https://topsaude.alleart.com.br,https://apitopsaude.alleart.com.br
+      SECRET_KEY: sua-chave-secreta-aqui
+      ALLOWED_HOSTS: topsaude.alleart.com.br,apitopsaude.alleart.com.br
+    networks:
+      - topsaude_network
+      - aiautomate
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=aiautomate"
+        - "traefik.http.routers.topsaude-backend.rule=Host(`apitopsaude.alleart.com.br`)"
+        - "traefik.http.routers.topsaude-backend.entrypoints=websecure"
+        - "traefik.http.routers.topsaude-backend.tls=true"
+        - "traefik.http.routers.topsaude-backend.tls.certresolver=letsencryptresolver"
+        - "traefik.http.services.topsaude-backend.loadbalancer.server.port=8000"
+      resources:
+        limits:
+          memory: 1024M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.5'
+    command: >
+      sh -c "
+        echo '⏳ Aguardando banco de dados...' &&
+        sleep 5 &&
+        echo '🔄 Aplicando migrações...' &&
+        alembic upgrade head &&
+        echo '✅ Migrações aplicadas!' &&
+        echo '🚀 Iniciando servidor FastAPI em modo produção...' &&
+        uvicorn src.main:app --host 0.0.0.0 --port 8000 --workers 1
+      "
+
+  # ==========================================
+  # FRONTEND - PRODUÇÃO (React + Vite + Nginx)
+  # ==========================================
+  frontend:
+    image: topsaude-frontend:latest
+    networks:
+      - topsaude_network
+      - aiautomate
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=aiautomate"
+        - "traefik.http.routers.topsaude-frontend.rule=Host(`topsaude.alleart.com.br`)"
+        - "traefik.http.routers.topsaude-frontend.entrypoints=websecure"
+        - "traefik.http.routers.topsaude-frontend.tls=true"
+        - "traefik.http.routers.topsaude-frontend.tls.certresolver=letsencryptresolver"
+        - "traefik.http.services.topsaude-frontend.loadbalancer.server.port=80"
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.5'
+        reservations:
+          memory: 64M
+          cpus: '0.25'
+
+# ==========================================
+# VOLUMES
+# ==========================================
+volumes:
+  postgres_data:
+    driver: local
+    name: topsaude_postgres_data
+
+# ==========================================
+# NETWORKS
+# ==========================================
+networks:
+  topsaude_network:
+    driver: overlay
+    name: topsaude_network
+  
+  aiautomate:
+    external: true
