@@ -9,6 +9,7 @@ import customerService from '../../services/customerService';
 import { formatDocument, formatDate } from '../../services/api';
 import type { Customer, CustomerListResponse } from '../../types';
 import { PAGINATION } from '../../constants';
+import CustomerForm from '../../components/forms/CustomerForm';
 
 /**
  * Página de Listagem de Clientes
@@ -39,6 +40,10 @@ const CustomerList: React.FC = () => {
   const debouncedName = useDebounce(searchName, 500);
   const debouncedEmail = useDebounce(searchEmail, 500);
   const debouncedDocument = useDebounce(searchDocument, 500);
+
+  // Modal de criação/edição
+const [isFormOpen, setIsFormOpen] = useState(false);
+const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
 // ==========================================
   // BUSCAR CLIENTES (ENVIA FILTROS AO BACKEND)
@@ -212,7 +217,7 @@ const CustomerList: React.FC = () => {
           </div>
           
           <button
-            onClick={() => alert('➕ Criar novo cliente (Parte 14)')}
+            onClick={() => setIsFormOpen(true)}
             className="flex items-center space-x-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold shadow-lg hover:shadow-xl"
           >
             <Plus className="w-5 h-5" />
@@ -327,6 +332,18 @@ const CustomerList: React.FC = () => {
           emptyMessage="Nenhum cliente encontrado. Que tal cadastrar o primeiro?"
         />
       </div>
+
+      {/* Modal de Criação/Edição */}
+      <CustomerForm
+        isOpen={isFormOpen}
+        onClose={() => {
+          setIsFormOpen(false);
+          setSelectedCustomer(null);
+        }}
+        onSuccess={() => fetchCustomers()}
+        customer={selectedCustomer}
+      />
+      
     </div>
   );
 };
